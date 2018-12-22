@@ -1,3 +1,4 @@
+"""This module contains a full forum thread parser."""
 
 try: 
     from BeautifulSoup import BeautifulSoup
@@ -124,6 +125,14 @@ class ForumThread(object):
             self.topic_num, len(self.users), len(self.posts), 
             self.name, 
         )
+
+    def to_df(self):
+        """Returns a pandas DataFrame representing self."""
+        import pandas as pd 
+
+        all_srs = [pp.to_series() for pp in self.posts]
+        res = pd.DataFrame(all_srs)
+        return res
 
 
 # t = ForumThread("http://www.bay12forums.com/smf/index.php?topic=42347.0")  

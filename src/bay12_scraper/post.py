@@ -1,3 +1,4 @@
+"""This module contains the ForumPost and a page parser to get posts."""
 
 try: 
     from BeautifulSoup import BeautifulSoup
@@ -39,6 +40,17 @@ class ForumPost(object):
         self.raw_soup = raw_soup
         for k, v in kwargs.items():
             setattr(self, k, v)
+
+    def to_series(self):
+        """Returns a pandas Series representing self."""
+        import pandas as pd
+        
+        res = pd.Series({
+            'user': self.user, 
+            'text': self.text, 
+            'quotes': self.quotes, 
+        }).loc[['user', 'text']]  # maybe quotes too 
+        return res
 
     def __repr__(self):
         return "ForumPost(%r, %s symbols, %s quotes)" % (
