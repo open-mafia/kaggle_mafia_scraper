@@ -14,10 +14,11 @@ QUOTE_REPLACEMENT = " QUOTED_SECTION "
 
 class Post(object):
 
-    def __init__(self, user, text, quotes=[], **kwargs):
+    def __init__(self, user, text, quotes=[], raw_soup=None, **kwargs):
         self.user = user 
         self.text = text 
         self.quotes = quotes 
+        self.raw_soup = raw_soup
         for k, v in kwargs.items():
             setattr(self, k, v)
 

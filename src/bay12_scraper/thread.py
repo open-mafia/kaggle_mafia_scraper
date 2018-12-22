@@ -89,12 +89,23 @@ class ForumThread(object):
         
         self.users = list(OrderedDict.fromkeys((p.user for p in self.posts)))
 
-        # TODO: Get thread name
+        # Get thread name
+        # TODO: Maybe get original name instead of final name?
+        # Then would need to parse the first reply to the first post... 
+        # Currently we use the easiest one though.
+        sp_topic = self.soup.find('span', {'id': 'top_subject'})
+        self.name = sp_topic.text[
+            len('Topic: ') :
+            sp_topic.text.find('\xa0') - 1
+        ]
+
         # TODO: Calc other meta-info?
+        # nah
 
     def __repr__(self):
-        return "ForumThread(topic_num=%s, %s users, %s posts)" % (
+        return "ForumThread(topic_num=%s, %s users, %s posts, name=%s)" % (
             self.topic_num, len(self.users), len(self.posts), 
+            self.name, 
         )
 
 
