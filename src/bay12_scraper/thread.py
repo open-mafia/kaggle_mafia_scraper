@@ -63,13 +63,30 @@ def get_topic_num(url):
 
 
 class ForumThread(object):
-    """Extracts info from """
+    """Scrapes a full thread based on any url of it.
+    
+    Attributes
+    ----------
+    url : str
+    posts : list
+        List of all ForumPost's.
+    users : list
+        List of all usernames that posted.
+    name : str
+        Name of the topic. Currently, uses final name.
+    base_url : str
+    topic_num : int
+    num_pages : int
+    soup : BeautifulSoup
+        Parsed given page (from url), not initial page.
+    """
 
     def __init__(self, url):
         self.url = url
         self.base_url = get_base_url(url)
         self.topic_num = get_topic_num(url)
-        response = requests.get(url) 
+
+        response = requests.get(url)  # TODO: maybe change to base_url?
         self.soup = BeautifulSoup(response.text, 'html.parser')  # 'html5lib' ?
         self.num_pages = get_thread_page_count(self.soup)
         self.sub_urls = [

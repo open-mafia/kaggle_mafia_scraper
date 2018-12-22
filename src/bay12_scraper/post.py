@@ -13,6 +13,24 @@ QUOTE_REPLACEMENT = " QUOTED_SECTION "
 
 
 class ForumPost(object):
+    """A single forum post, with omitted quotes.
+
+    Attributes
+    ----------
+    user : str
+        The poster's username.
+    text : str
+        The post's text, with quotes substitued for QUOTE_REPLACEMENT.
+    quotes : list
+        The quotes from the submitted text.
+    raw_soup : BeautifulSoup
+        The soup this post was parsed from.
+
+    TODO
+    ----
+    Try to get the timestamp, maybe? At worst we just have the 
+    submission order, which isn't bad at all. 
+    """
 
     def __init__(self, user, text, quotes=[], raw_soup=None, **kwargs):
         self.user = user 
@@ -29,7 +47,10 @@ class ForumPost(object):
 
     @classmethod
     def from_soup(cls, soup):
+        """Parses the ForumPost from some soup. 
 
+        See parse_forum_page_to_posts for how to prepare it.
+        """
         user = (
             soup
             .find("div", {'class': 'poster'})
