@@ -12,7 +12,7 @@ import logging
 QUOTE_REPLACEMENT = " QUOTED_SECTION "
 
 
-class Post(object):
+class ForumPost(object):
 
     def __init__(self, user, text, quotes=[], raw_soup=None, **kwargs):
         self.user = user 
@@ -23,7 +23,7 @@ class Post(object):
             setattr(self, k, v)
 
     def __repr__(self):
-        return "Post(%r, %s symbols, %s quotes)" % (
+        return "ForumPost(%r, %s symbols, %s quotes)" % (
             self.user, len(self.text), len(self.quotes), 
         )
 
@@ -77,7 +77,7 @@ class Post(object):
 
 
 def parse_forum_page_to_posts(url):
-    """Finds all posts from a url, parses to Post."""
+    """Finds all posts from a url, parses to ForumPost."""
 
     response = requests.get(url) 
     soup = BeautifulSoup(response.text, "html.parser")  # html5lib?
@@ -91,7 +91,7 @@ def parse_forum_page_to_posts(url):
     posts = []
     for wp in wrapped_posts:
         try:
-            posts.append(Post.from_soup(wp))
+            posts.append(ForumPost.from_soup(wp))
         except Exception:
             # logging.exception('Error parsing post.')
             pass  # logging is too annoying here :P 

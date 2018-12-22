@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 from collections import OrderedDict
 
-from post import Post, parse_forum_page_to_posts
+from bay12_scraper.post import parse_forum_page_to_posts  # ForumPost
 
 
 #url = "http://www.bay12forums.com/smf/index.php?topic=42347.0"
@@ -103,7 +103,7 @@ class ForumThread(object):
         # nah
 
     def __repr__(self):
-        return "ForumThread(topic_num=%s, %s users, %s posts, name=%s)" % (
+        return "[ForumThread #%s with %s users and %s posts]: %r" % (
             self.topic_num, len(self.users), len(self.posts), 
             self.name, 
         )
