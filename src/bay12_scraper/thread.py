@@ -10,7 +10,7 @@ import re  # regex
 import logging
 logger = logging.getLogger(__name__)
 
-from collections import OrderedDict
+from collections import Counter  #OrderedDict
 
 from bay12_scraper.post import parse_forum_page_to_posts  # ForumPost
 
@@ -105,7 +105,12 @@ class ForumThread(object):
 
         # Filter out users 
         
-        self.users = list(OrderedDict.fromkeys((p.user for p in self.posts)))
+        self.users = Counter()
+        for p in self.posts:
+            self.users[p.user] += 1
+
+        # Old version
+        # self.users = list(OrderedDict.fromkeys((p.user for p in self.posts)))
 
         # Get thread name
         # TODO: Maybe get original name instead of final name?
