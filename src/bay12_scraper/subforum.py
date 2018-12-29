@@ -43,7 +43,6 @@ class SubforumAnalyzer(object):
 
             # Parse all rows
             for row in rows:
-                row = rows[0]
                 link = row.find('td', {'class': 'subject'}).find('a')
                 thread = dict(
                     url = link['href'], 
