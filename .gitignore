@@ -7,3 +7,5 @@
 *.egg-info
 src/dist
 src/build
+
+output

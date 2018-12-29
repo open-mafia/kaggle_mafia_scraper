@@ -6,5 +6,4 @@ OUTPUT_THREADS = 'output/threads.csv'
 
 if __name__ == "__main__":
     TL = ThreadLabeler()
-    TL.menu_threads()
-    TL.df_labels.to_csv(OUTPUT_THREADS)
+    TL.menu_threads(filename=OUTPUT_THREADS)
