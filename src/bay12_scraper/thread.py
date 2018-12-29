@@ -15,6 +15,9 @@ from collections import Counter  #OrderedDict
 from bay12_scraper.post import parse_forum_page_to_posts  # ForumPost
 
 
+from prompt_toolkit.shortcuts import ProgressBar
+
+
 #url = "http://www.bay12forums.com/smf/index.php?topic=42347.0"
 # Later post:
 # http://www.bay12forums.com/smf/index.php?topic=42347.350
@@ -98,10 +101,11 @@ class ForumThread(object):
 
         # Get individual posts by reading pages
         self.posts = []
-        for sub_url in self.sub_urls:
-            logger.info('Parsing url: %s' % sub_url)
-            page_posts = parse_forum_page_to_posts(sub_url)
-            self.posts.extend(page_posts)
+        with ProgressBar() as pb:
+            for sub_url in pb(self.sub_urls):
+                logger.info('Parsing url: %s' % sub_url)
+                page_posts = parse_forum_page_to_posts(sub_url)
+                self.posts.extend(page_posts)
 
         # Filter out users 
         

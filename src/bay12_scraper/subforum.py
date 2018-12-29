@@ -7,6 +7,9 @@ except ImportError:
 
 import requests
 import re  # regex
+
+from prompt_toolkit.shortcuts import ProgressBar
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -33,25 +36,26 @@ class SubforumAnalyzer(object):
 
         # Go through each page and get all thread info
         self.threads = []
-        for i in range(n_pages_total):
-            s_response = requests.get(base_url + str(20*i))
-            s_soup = BeautifulSoup(s_response.text, 'html.parser')
+        with ProgressBar() as pb:
+            for i in pb(range(n_pages_total), total=n_pages_total):
+                s_response = requests.get(base_url + str(20*i))
+                s_soup = BeautifulSoup(s_response.text, 'html.parser')
 
-            # Find table of threads
-            tbl = s_soup.find('div', {'id': 'messageindex'}).find('tbody')
-            rows = tbl.find_all('tr')
+                # Find table of threads
+                tbl = s_soup.find('div', {'id': 'messageindex'}).find('tbody')
+                rows = tbl.find_all('tr')
 
-            # Parse all rows
-            for row in rows:
-                link = row.find('td', {'class': 'subject'}).find('a')
-                thread = dict(
-                    url = link['href'], 
-                    name = link.text, 
-                    replies = int(
-                        row.find('td', {'class': 'replies'}).text.strip()
-                    ), 
-                )
-                self.threads.append(thread)
+                # Parse all rows
+                for row in rows:
+                    link = row.find('td', {'class': 'subject'}).find('a')
+                    thread = dict(
+                        url = link['href'], 
+                        name = link.text, 
+                        replies = int(
+                            row.find('td', {'class': 'replies'}).text.strip()
+                        ), 
+                    )
+                    self.threads.append(thread)
 
         # We now have all thread info, and are done.
 
