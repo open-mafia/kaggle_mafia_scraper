@@ -49,7 +49,7 @@ class ForumPost(object):
             'user': self.user, 
             'text': self.text, 
             'quotes': self.quotes, 
-        }).loc[['user', 'text']]  # maybe quotes too 
+        }).loc[['user', 'text', 'quotes']] 
         return res
 
     def __repr__(self):

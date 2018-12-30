@@ -1,9 +1,7 @@
 
 import pandas as pd 
-from bay12_scraper.menu import ThreadLabeler 
-
-OUTPUT_THREADS = 'output/threads.csv'
+from bay12_scraper.menu import ThreadLabeler
 
 if __name__ == "__main__":
-    TL = ThreadLabeler()
-    TL.menu_threads(filename=OUTPUT_THREADS)
+    TL = ThreadLabeler(folder='./output') # 
+    TL.menu_threads()

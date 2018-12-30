@@ -14,7 +14,7 @@ from collections import Counter  #OrderedDict
 
 from bay12_scraper.post import parse_forum_page_to_posts  # ForumPost
 
-
+import pandas as pd 
 from prompt_toolkit.shortcuts import ProgressBar
 
 
@@ -135,12 +135,13 @@ class ForumThread(object):
             self.name, 
         )
 
-    def to_df(self):
+    @property
+    def df(self):
         """Returns a pandas DataFrame representing self."""
-        import pandas as pd 
-
+        if hasattr(self, '_df'):
+            return self._df
         all_srs = [pp.to_series() for pp in self.posts]
-        res = pd.DataFrame(all_srs)
+        self._df = res = pd.DataFrame(all_srs)
         return res
 
 
