@@ -7,7 +7,6 @@ except ImportError:
 
 from copy import copy 
 import requests
-import logging 
 
 
 QUOTE_REPLACEMENT = " QUOTED_SECTION "
@@ -72,8 +71,8 @@ class ForumPost(object):
 
         wrapped = (
             soup
-            .find("div",{'class':'post'})
-            .find("div",{'class':'inner'})
+            .find("div", {'class': 'post'})
+            .find("div", {'class': 'inner'})
         )
 
         # Save old wrapped soup
@@ -117,7 +116,7 @@ def parse_forum_page_to_posts(url):
 
     wrapped_posts = (
         soup
-        .find("div",{"id": "forumposts"})
+        .find("div", {"id": "forumposts"})
         .find("form")
         .children
     )

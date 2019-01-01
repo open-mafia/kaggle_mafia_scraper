@@ -13,20 +13,19 @@ import warnings
 
 from prompt_toolkit import (
     print_formatted_text as print,
-    HTML, prompt, PromptSession, 
+    HTML, prompt, 
 )
-from prompt_toolkit.formatted_text import FormattedText
-from prompt_toolkit.shortcuts import clear
-from prompt_toolkit.styles import Style 
 from prompt_toolkit.completion import WordCompleter
-from prompt_toolkit.validation import Validator, ValidationError
+from prompt_toolkit.validation import Validator
 
 
 def prompt_in(message, labels=[], force=True, **kwargs):
     if (len(labels) == 0) or not force:
-        val = lambda x: True
+        def val(x):
+            return True
     else:
-        val = lambda x: x in labels
+        def val(x):
+            return x in labels
     result = prompt(
         message, 
         completer=WordCompleter(labels), 
@@ -38,12 +37,14 @@ def prompt_in(message, labels=[], force=True, **kwargs):
 
 # Set up web browser
 import webbrowser
-firefox_path = r"C:\Program Files\Mozilla Firefox\firefox.exe"
-webbrowser.register('firefox', None, webbrowser.BackgroundBrowser(firefox_path), 1)
+ffp = r"C:\Program Files\Mozilla Firefox\firefox.exe"
+webbrowser.register('firefox', None, webbrowser.BackgroundBrowser(ffp), 1)
 firefox = webbrowser.get('firefox')
+
 
 def open_url(url):
     firefox.open_new_tab(url)
+
 
 def print_thread(url, name='', replies=0):
     print(HTML(dedent("""
@@ -54,12 +55,13 @@ def print_thread(url, name='', replies=0):
         """.format(header=SEPARATOR, url=url, name=name, replies=replies)
     )))        
 
+
 #
+
 SEPARATOR = "============================="
 
 REPLACED = 'replaced'
 SKIP = 'skip [!]'
-
 
 
 class ThreadLabeler(SubforumAnalyzer):
@@ -97,7 +99,10 @@ class ThreadLabeler(SubforumAnalyzer):
         Columns: [url, thread_num, thread_name, thread_label, thread_replies]
         """
 
-        res_cols = ['url', 'thread_num', 'thread_name', 'thread_label', 'thead_replies']
+        res_cols = [
+            'url', 'thread_num', 'thread_name', 
+            'thread_label', 'thead_replies', 
+        ]
 
         filename = os.path.join(self.folder, threads_file)
 
@@ -122,7 +127,7 @@ class ThreadLabeler(SubforumAnalyzer):
             
             try:
                 open_url(url)
-                #clear()
+                # clear()
                 print_thread(**thread_dict)
 
                 # Get label
@@ -130,9 +135,12 @@ class ThreadLabeler(SubforumAnalyzer):
                 if label == SKIP:
                     continue
 
-                df = pd.DataFrame([[url, thread_num, name, label, replies]], columns=res_cols)
+                df = pd.DataFrame(
+                    [[url, thread_num, name, label, replies]], 
+                    columns=res_cols
+                )
                 with open(filename, 'a', encoding='utf-8') as f:
-                    is_first = (f.tell()==0)
+                    is_first = (f.tell() == 0)
                     df.to_csv(f, header=is_first, index=False)
                 labels.append(df)
             except Exception:
@@ -152,7 +160,6 @@ class RoleLabeler(object):
     ]
     UNKNOWN_ROLE = 'unknown'
     DEFAULT_FOLDER = './output'
-
 
     def __init__(self, folder=None):
         self.folder = os.path.abspath(folder or self.DEFAULT_FOLDER)
@@ -179,10 +186,10 @@ class RoleLabeler(object):
 
         return res
 
-
     def menu_roles(
-        self, relevant_thread_labels = ['vanilla', 'beginners-mafia'],
-        threads_file='threads.csv', roles_file='roles.csv', posts_folder='posts', 
+        self, relevant_thread_labels=['vanilla', 'beginners-mafia'],
+        threads_file='threads.csv', roles_file='roles.csv', 
+        posts_folder='posts', 
     ):
         """Main loop for labelling user roles, as well as outputting posts.
 
@@ -225,7 +232,6 @@ class RoleLabeler(object):
         except FileNotFoundError:
             pass
 
-
         # Prepare labels (in a loop)
         labels = []
         for _, t in threads.iterrows():
@@ -237,7 +243,7 @@ class RoleLabeler(object):
             
             try:
                 open_url(url)
-                #clear()
+                # clear()
                 print_thread(url, t.thread_name, t.thread_replies)
 
                 # Parse the thread's posts
@@ -266,13 +272,14 @@ class RoleLabeler(object):
                         op = thread_df.loc[0, 'text']
                         for uname in dfu.index:
                             if (op.lower().find(uname.lower()) == -1):
-                                # assume if name not in OP then they aren't playing
+                                # assume if name not in OP then they 
+                                # aren't playing
                                 dfu.role[uname] = 'observer'
-                        dfu.role[thread_df.loc[0, 'user']] = 'game-master'  # original poster is usually GM 
-
-                # Ask for not-set users
-                #while (dfu.role == self.UNKNOWN_ROLE).any():
-                while True:  # actually, let me double-check and just skip to end
+                        # original poster is usually GM 
+                        dfu.role[thread_df.loc[0, 'user']] = 'game-master'  
+                        
+                while True:  
+                    # Exits when SKIP is entered.
                     print(dfu[['num_posts', 'role', 'replaced_by']])
                     print(SKIP)
 
@@ -285,7 +292,9 @@ class RoleLabeler(object):
                     if label == SKIP:
                         continue
                     elif label == REPLACED:
-                        repl_by = prompt_in("Replaced by: ", list(dfu.index) + [SKIP])
+                        repl_by = prompt_in(
+                            "Replaced by: ", list(dfu.index) + [SKIP]
+                        )
                         if repl_by == SKIP:
                             continue
                         # Replacement
@@ -301,7 +310,7 @@ class RoleLabeler(object):
                 res = dfu.reset_index()[res_cols]
 
                 with open(full_roles_file, 'a', encoding='utf-8') as f:
-                    is_first = (f.tell()==0)
+                    is_first = (f.tell() == 0)
                     res.to_csv(f, header=is_first, index=False)
                 labels.append(res)
 

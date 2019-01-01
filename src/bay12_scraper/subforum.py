@@ -38,7 +38,7 @@ class SubforumAnalyzer(object):
         self.threads = []
         with ProgressBar() as pb:
             for i in pb(range(n_pages_total), total=n_pages_total):
-                s_response = requests.get(base_url + str(20*i))
+                s_response = requests.get(base_url + str(20 * i))
                 s_soup = BeautifulSoup(s_response.text, 'html.parser')
 
                 # Find table of threads
@@ -49,9 +49,9 @@ class SubforumAnalyzer(object):
                 for row in rows:
                     link = row.find('td', {'class': 'subject'}).find('a')
                     thread = dict(
-                        url = link['href'], 
-                        name = link.text, 
-                        replies = int(
+                        url=link['href'], 
+                        name=link.text, 
+                        replies=int(
                             row.find('td', {'class': 'replies'}).text.strip()
                         ), 
                     )

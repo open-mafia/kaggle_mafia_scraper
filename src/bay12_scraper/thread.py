@@ -10,7 +10,7 @@ import re  # regex
 import logging
 logger = logging.getLogger(__name__)
 
-from collections import Counter  #OrderedDict
+from collections import Counter
 
 from bay12_scraper.post import parse_forum_page_to_posts  # ForumPost
 
@@ -18,13 +18,13 @@ import pandas as pd
 from prompt_toolkit.shortcuts import ProgressBar
 
 
-#url = "http://www.bay12forums.com/smf/index.php?topic=42347.0"
+# url = "http://www.bay12forums.com/smf/index.php?topic=42347.0"
 # Later post:
 # http://www.bay12forums.com/smf/index.php?topic=42347.350
 # Thus we can infer the schema from that
 
-#response = requests.get(url) 
-#parsed_html = BeautifulSoup(response.text, 'html.parser') 
+# response = requests.get(url) 
+# parsed_html = BeautifulSoup(response.text, 'html.parser') 
 
 # Something to look at later maybe?...
 # response = requests.get(url + "&action=.xml") 
@@ -36,14 +36,14 @@ def get_thread_page_count(parsed_html):
     """Returns the number of pages in current thread."""
     page_html = (
         parsed_html
-        .find("div",{"id":"postbuttons"})
-        .find("div",{"class":"margintop middletext floatleft"})
+        .find("div", {"id": "postbuttons"})
+        .find("div", {"class": "margintop middletext floatleft"})
     )
-    nav_pages = page_html.find_all("a",{"class":"navPages"})
+    nav_pages = page_html.find_all("a", {"class": "navPages"})
     num_pages = 0
     for p in nav_pages:
         x = int(p.text)
-        if (x>num_pages):
+        if (x > num_pages):
             num_pages = x
     return num_pages
 
@@ -52,13 +52,14 @@ def get_base_url(url):
     """Finds the "base url" to concat with post numbers."""
     return re.compile(r".*topic=[0-9]+\.").findall(url)[0]
 
+
 def get_topic_num(url):
     """Finds the topic number from the url."""
     tn_reg = r"\?.*topic=[0-9]+\."
     tn_s = r'topic='
     topic_num_raw = re.compile(tn_reg).findall(url)[0]
     topic_num = int(
-        topic_num_raw[topic_num_raw.find(tn_s)+len(tn_s):-1]
+        topic_num_raw[topic_num_raw.find(tn_s) + len(tn_s):-1]
     )
     return topic_num
 
@@ -122,7 +123,7 @@ class ForumThread(object):
         # Currently we use the easiest one though.
         sp_topic = self.soup.find('span', {'id': 'top_subject'})
         self.name = sp_topic.text[
-            len('Topic: ') :
+            len('Topic: '):
             sp_topic.text.find('\xa0') - 1
         ]
 
