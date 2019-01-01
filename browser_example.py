@@ -8,7 +8,7 @@ import webbrowser
 
 
 ffp = r"C:\Program Files\Mozilla Firefox\firefox.exe"
-webbrowser.register('firefox', None, webbrowser.BackgroundBrowser(ffp), 1)
+webbrowser.register('firefox', webbrowser.BackgroundBrowser(ffp), 1)
 firefox = webbrowser.get('firefox')
 firefox.open_new_tab(url)
 

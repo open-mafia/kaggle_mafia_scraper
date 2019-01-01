@@ -37,13 +37,13 @@ def prompt_in(message, labels=[], force=True, **kwargs):
 
 # Set up web browser
 import webbrowser
-ffp = r"C:\Program Files\Mozilla Firefox\firefox.exe"
-webbrowser.register('firefox', None, webbrowser.BackgroundBrowser(ffp), 1)
-firefox = webbrowser.get('firefox')
+# ffp = r"C:\Program Files\Mozilla Firefox\firefox.exe"
+# webbrowser.register('firefox', webbrowser.BackgroundBrowser(ffp), 1)
+# firefox = webbrowser.get('firefox')
 
 
 def open_url(url):
-    firefox.open_new_tab(url)
+    webbrowser.open_new_tab(url)
 
 
 def print_thread(url, name='', replies=0):
