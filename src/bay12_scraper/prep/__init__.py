@@ -8,7 +8,7 @@ import pandas as pd
 from bay12_scraper.thread import ForumThread
 
 
-def load_or_create_posts(fname, roles=None, threads=None):
+def load_or_create_posts(fname, roles=None, threads=None, incremental=False):
     """Loads the Posts dataframe.
     
     If doesn't exist, creates one from roles, threads, and online material.
@@ -27,24 +27,89 @@ def load_or_create_posts(fname, roles=None, threads=None):
         posts['quotes'] = posts['quotes'].apply(literal_eval)
         return posts
     except FileNotFoundError:
-        if not (roles and threads):
+        if (roles is None) or (threads is None):
             raise
     
     dfs = []
+    i = 0
     for t_num in sorted(roles.thread_num.unique()):
         try:
+            i += 1
             ft = ForumThread(threads[threads.thread_num == t_num].url.iloc[0])
             df = ft.df.copy()
             df.insert(0, 'thread_num', t_num)
             dfs.append(df)
         except Exception:
             logging.exception('Failure during thread #%s' % t_num)
+            continue
+        
+        if incremental:
+            df.to_csv(
+                fname, mode='a', index=False, header=(i == 0), 
+                encoding='utf-8'
+            )
+
     posts = pd.concat(dfs, axis='rows')
-    try:
-        posts.to_csv(fname, index=False, header=True, encoding='utf-8')
-    except Exception:
-        logging.exception('Could not write to CSV file. Check dir exists?')
+    if not incremental:
+        posts.to_csv(
+            fname, index=False, header=(i == 0), 
+            encoding='utf-8'
+        )
     return posts
+
+
+def load_or_create_extended_posts(fname, threads=None, incremental=True):
+    """Loads the EPosts dataframe.
+    
+    If doesn't exist, creates one from threads and online material.
+    
+    Parameters
+    ----------
+    fname : str
+        File name to read to/write from.
+    roles, threads : pd.DataFrame
+        Roles and Threads dataframe.
+    """
+    
+    try:
+        eposts = pd.read_csv(fname, header=0, encoding='utf-8')
+        # turn string into list of strings
+        eposts['quotes'] = eposts['quotes'].apply(literal_eval)
+        return eposts
+    except FileNotFoundError:
+        if (threads is None):
+            raise
+
+    print('TOTAL THREADS: %s' % len(threads))
+
+    dfs = []
+    for i, row in threads.iterrows():
+        try:
+            t_url = row.url
+            t_num = row.thread_num 
+            ft = ForumThread(t_url)
+            df = ft.df.copy()
+            df.insert(0, 'thread_num', t_num)
+            dfs.append(df)
+
+            if ((i + 1) % 20 == 0):
+                print('Saved threads: %s' % i)
+        except Exception:
+            logging.exception('Failure during thread #%s' % t_num)
+            continue
+        
+        if incremental:
+            df.to_csv(
+                fname, mode='a', index=False, header=(i == 0), 
+                encoding='utf-8'
+            )        
+    eposts = pd.concat(dfs, axis='rows')
+    if not incremental:
+        eposts.to_csv(
+            fname, index=False, header=(i == 0), 
+            encoding='utf-8'
+        )        
+    return eposts
 
 
 def fix_roles_df(df_roles):
