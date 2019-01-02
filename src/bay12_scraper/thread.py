@@ -92,7 +92,7 @@ class ForumThread(object):
         self.topic_num = get_topic_num(url)
 
         response = requests.get(url)  # TODO: maybe change to base_url?
-        self.soup = BeautifulSoup(response.text, 'html.parser')  # 'html5lib' ?
+        self.soup = BeautifulSoup(response.text, 'lxml') # html.parser') ?
         self.num_pages = get_thread_page_count(self.soup)
         self.sub_urls = [
             # posts are split into groups of 15 by SMF
@@ -102,7 +102,7 @@ class ForumThread(object):
 
         # Get individual posts by reading pages
         self.posts = []
-        with ProgressBar() as pb:
+        with ProgressBar(title="#{}".format(self.topic_num)) as pb:
             for sub_url in pb(self.sub_urls):
                 logger.info('Parsing url: %s' % sub_url)
                 page_posts = parse_forum_page_to_posts(sub_url)

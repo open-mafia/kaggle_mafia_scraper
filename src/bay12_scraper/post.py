@@ -88,7 +88,8 @@ class ForumPost(object):
 
             qt_body = wrapped.find("blockquote")
             if qt_body:
-                quotes.append(qt_body) 
+                qt_txt_repr = str(qt_body)
+                quotes.append(qt_txt_repr) 
                 qt_body.replace_with(QUOTE_REPLACEMENT)
 
             qt_footer = wrapped.find("div", {"class": "quotefooter"})
