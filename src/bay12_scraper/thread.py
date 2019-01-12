@@ -17,6 +17,8 @@ from bay12_scraper.post import parse_forum_page_to_posts  # ForumPost
 import pandas as pd 
 from prompt_toolkit.shortcuts import ProgressBar
 
+import time 
+
 
 # url = "http://www.bay12forums.com/smf/index.php?topic=42347.0"
 # Later post:
@@ -40,7 +42,7 @@ def get_thread_page_count(parsed_html):
         .find("div", {"class": "margintop middletext floatleft"})
     )
     nav_pages = page_html.find_all("a", {"class": "navPages"})
-    num_pages = 0
+    num_pages = 1  # default to 1 page, because... duh.
     for p in nav_pages:
         x = int(p.text)
         if (x > num_pages):
@@ -104,13 +106,29 @@ class ForumThread(object):
 
         # Get individual posts by reading pages
         self.posts = []
-        with ProgressBar(title="#{}".format(self.topic_num)) as pb:
-            for sub_url in pb(self.sub_urls):
-                logger.info('Parsing url: %s' % sub_url)
-                page_posts = parse_forum_page_to_posts(
-                    sub_url, timeout=self.timeout
-                )
-                self.posts.extend(page_posts)
+        # NOTE: Removing the ProgressBar temporarily, because it just liked 
+        # to mess up, sadly... TODO: Report bug? Maybe 
+        # with ProgressBar(title="#{}".format(self.topic_num)) as pb:
+        #     for sub_url in pb(self.sub_urls):
+        #
+        if True:
+            print("#{} ({} pages)".format(self.topic_num, len(self.sub_urls))) 
+            for sub_url in self.sub_urls:
+
+                retry = True
+                while retry:
+                    try:
+                        logger.info('Parsing url: %s' % sub_url)
+                        page_posts = parse_forum_page_to_posts(
+                            sub_url, timeout=self.timeout
+                        )
+                        self.posts.extend(page_posts)
+                        retry = False
+                    except Exception:
+                        logger.exception(
+                            "Error while parsing url: %s" % sub_url)
+                        print("Error while parsing url: %s" % sub_url)
+                        time.sleep(self.timeout)
 
         # Filter out users 
         
