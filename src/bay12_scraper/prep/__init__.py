@@ -113,27 +113,48 @@ def load_or_create_extended_posts(fname, threads=None, incremental=True):
 
 
 def fix_roles_df(df_roles):
-    df_roles_fixed = df_roles.copy()
+    """Fixes quirks with replacement. 
+    
+    Adds replacement_depth and final_player columns, while 
+    also assigning the appropriate roles to each player.
+    """
 
-    tbr = (df_roles_fixed['role'] == 'replaced')
-    df_roles_fixed['replacement_depth'] = 0
+    df_fixed = df_roles.copy()
 
-    cols_fixed = list(df_roles.columns) + ['replacement_depth']
+    df_fixed['replacement_depth'] = 0
+    df_fixed['final_player'] = float('nan')
 
+    cols_fixed = (
+        list(df_roles.columns) + 
+        ['replacement_depth', 'final_player']
+    )
+
+    # tbr == "to be replaced"
+    tbr = (df_fixed['role'] == 'replaced')
+    # Set "original player" roles
+    df_fixed['final_player'][~tbr] = df_fixed['user'][~tbr]
+
+    # Loop while we still have folks we need to replace
     while tbr.sum():
-        df_roles_fixed = df_roles_fixed.merge(
-            df_roles_fixed, how='left', 
+        df_fixed = df_fixed.merge(
+            df_fixed, how='left', 
             left_on=['thread_num', 'replaced_by'], 
             right_on=['thread_num', 'user'], 
-            suffixes=('', '_repl')
-        )[cols_fixed + ['role_repl']]
+            suffixes=('', '_r')
+        )[cols_fixed + ['role_r', 'final_player_r']]
         
-        tbr = (df_roles_fixed['role'] == 'replaced')
-        df_roles_fixed['role'][tbr] = df_roles_fixed['role_repl'][tbr]
-        df_roles_fixed['replacement_depth'][tbr] += 1
-        df_roles_fixed = df_roles_fixed[cols_fixed]
+        # Find who still needs to be replaced
+        tbr = (df_fixed['role'] == 'replaced')
+
+        # Replace the right-hand role
+        df_fixed['role'][tbr] = df_fixed['role_r'][tbr]
+        # Replace the right-hand 'final player'
+        df_fixed['final_player'][tbr] = df_fixed['final_player_r'][tbr]
+        # Add one to replacement depth
+        df_fixed['replacement_depth'][tbr] += 1
+        df_fixed = df_fixed[cols_fixed]
     
-    return df_roles_fixed
+    return df_fixed
 
 
 def split_ds(roles, posts, pct_public=0.2, pct_private=0.2):
