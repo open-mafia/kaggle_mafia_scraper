@@ -7,6 +7,7 @@ except ImportError:
 
 from copy import copy 
 import requests
+import time 
 
 
 QUOTE_REPLACEMENT = " QUOTED_SECTION "
@@ -109,10 +110,15 @@ class ForumPost(object):
         return cls(user=user, text=cleaned, quotes=quotes, raw_soup=dirty)
 
 
-def parse_forum_page_to_posts(url):
+def parse_forum_page_to_posts(url, timeout=None):
     """Finds all posts from a url, parses to ForumPost."""
 
-    response = requests.get(url) 
+    try:
+        response = requests.get(url, timeout=timeout) 
+    except requests.Timeout:
+        time.sleep(timeout * 2)
+        return parse_forum_page_to_posts(url, timeout=timeout * 1.5)
+
     soup = BeautifulSoup(response.text, "html.parser")  # html5lib?
 
     wrapped_posts = (

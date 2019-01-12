@@ -86,13 +86,15 @@ class ForumThread(object):
         Parsed given page (from url), not initial page.
     """
 
-    def __init__(self, url):
+    def __init__(self, url, timeout=None):
         self.url = url
         self.base_url = get_base_url(url)
         self.topic_num = get_topic_num(url)
+        self.timeout = timeout
 
-        response = requests.get(url)  # TODO: maybe change to base_url?
-        self.soup = BeautifulSoup(response.text, 'lxml') # html.parser') ?
+        response = requests.get(url, timeout=self.timeout)  
+        # TODO: maybe change to base_url?
+        self.soup = BeautifulSoup(response.text, 'lxml')  # html.parser') ?
         self.num_pages = get_thread_page_count(self.soup)
         self.sub_urls = [
             # posts are split into groups of 15 by SMF
@@ -105,7 +107,9 @@ class ForumThread(object):
         with ProgressBar(title="#{}".format(self.topic_num)) as pb:
             for sub_url in pb(self.sub_urls):
                 logger.info('Parsing url: %s' % sub_url)
-                page_posts = parse_forum_page_to_posts(sub_url)
+                page_posts = parse_forum_page_to_posts(
+                    sub_url, timeout=self.timeout
+                )
                 self.posts.extend(page_posts)
 
         # Filter out users 
