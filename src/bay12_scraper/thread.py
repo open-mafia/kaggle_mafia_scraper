@@ -88,7 +88,7 @@ class ForumThread(object):
         Parsed given page (from url), not initial page.
     """
 
-    def __init__(self, url, timeout=None):
+    def __init__(self, url, timeout=None, debug_print=False):
         self.url = url
         self.base_url = get_base_url(url)
         self.topic_num = get_topic_num(url)
@@ -108,13 +108,14 @@ class ForumThread(object):
         self.posts = []
         # NOTE: Removing the ProgressBar temporarily, because it just liked 
         # to mess up, sadly... TODO: Report bug? Maybe 
-        # with ProgressBar(title="#{}".format(self.topic_num)) as pb:
-        #     for sub_url in pb(self.sub_urls):
         #
-        if True:
-            print("#{} ({} pages)".format(self.topic_num, len(self.sub_urls))) 
-            for sub_url in self.sub_urls:
+        # if True:
+        with ProgressBar(title="#{}".format(self.topic_num)) as pb:
+            if debug_print:
+                print("#%s (%s pages)" % (self.topic_num, len(self.sub_urls))) 
 
+            # for sub_url in self.sub_urls:
+            for sub_url in pb(self.sub_urls):
                 retry = True
                 while retry:
                     try:
@@ -127,7 +128,8 @@ class ForumThread(object):
                     except Exception:
                         logger.exception(
                             "Error while parsing url: %s" % sub_url)
-                        print("Error while parsing url: %s" % sub_url)
+                        if debug_print:
+                            print("Error while parsing url: %s" % sub_url)
                         time.sleep(self.timeout)
 
         # Filter out users 
